@@ -1,0 +1,17 @@
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\ApplicationIcon.png
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\Background.png
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\WhereAmI.dll
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\WhereAmI.pdb
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\AppManifest.xaml
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\WhereAmI.xap
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\Microsoft.Phone.Controls.dll
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\Microsoft.Phone.Controls.xml
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\obj\Debug\ResolveAssemblyReference.cache
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\obj\Debug\App.g.i.cs
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\obj\Debug\MainPage.g.i.cs
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\obj\Debug\WhereAmI.g.resources
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\obj\Debug\WhereAmI.dll
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\obj\Debug\WhereAmI.pdb
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\obj\Debug\XapCacheFile.xml
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\Microsoft.Phone.Controls.Maps.dll
+c:\users\sdepold\documents\visual studio 2010\Projects\WhereAmI\WhereAmI\Bin\Debug\Microsoft.Phone.Controls.Maps.xml
