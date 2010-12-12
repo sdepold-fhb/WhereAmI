@@ -19,9 +19,8 @@ namespace WhereAmI
 {
     public partial class MainPage : PhoneApplicationPage
     {
-        IGeoPositionWatcher<GeoCoordinate> watcher;
-        double lat, lon;
-        int zoom;
+        IGeoPositionWatcher<GeoCoordinate> watcherMock;
+        MapSynchronizer ms;
 
         // Constructor
         public MainPage()
@@ -36,28 +35,20 @@ namespace WhereAmI
         // Load data for the ViewModel Items
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            if (!App.ViewModel.IsDataLoaded)
-                App.ViewModel.LoadData();
+            ms = new MapSynchronizer(1, 2, 3);
+            ms.maps.Add("bing", bingMap);
+            ms.images.Add("google", imageGoogleMaps);
+            ms.images.Add("osm", imageOSM);
+            ms.MapsUpdated += setZoomSliderLabel;
+            ms.update(52.515, 13.3331, 12);
 
-            updateMapParameters(52.515, 13.3331, 12);
-            updateMapLocations();
             initGeoLocationMock();
             initZoomSlider();
         }
 
-        private void initZoomSlider()
-        {
-            zoomSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(zoomSliderValueChanged);
-        }
-
-        private void initGeoLocation()
-        {
-
-        }
-
         private void initGeoLocationMock()
         {
-            if (watcher == null)
+            if (watcherMock == null)
             {
                 GeoCoordinateEventMock[] events = new GeoCoordinateEventMock[] {
                     new  GeoCoordinateEventMock { Latitude=52.515, Longitude=13.3331, Time=new TimeSpan(0,0,20) },
@@ -65,9 +56,9 @@ namespace WhereAmI
                     new  GeoCoordinateEventMock { Latitude=52.4145, Longitude=12.5555, Time=new TimeSpan(0,0,20) }
                 };
 
-                watcher = new EventListGeoLocationMock(events);
+                watcherMock = new EventListGeoLocationMock(events);
                 //watcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(watcherPositionChanged);
-                watcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(watcherPositionChanged);
+                watcherMock.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(watcherPositionChanged);
             }
             //watcher = new GeoCoordinateWatcher(accuracy);
             //watcher.MovementThreshold = 20;
@@ -75,58 +66,39 @@ namespace WhereAmI
             //watcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(watcher_StatusChanged);
             //watcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(watcher_PositionChanged);
 
-            watcher.Start(); 
+            watcherMock.Start(); 
+        }
+
+        private void initGeoLocation()
+        {
+
         }
 
         private void watcherPositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() => {
-                updateMapParameters(e.Position.Location.Latitude, e.Position.Location.Longitude);
-                updateMapLocations();
+                ms.update(e.Position.Location.Latitude, e.Position.Location.Longitude);
+            });
+        }
+
+        private void initZoomSlider()
+        {
+            zoomSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(zoomSliderValueChanged);
+        }
+
+        private void setZoomSliderLabel(object sender, EventArgs args)
+        {
+            Deployment.Current.Dispatcher.BeginInvoke(() => {
+                zoomText.Text = "Zoom-Level: " + ms.getZoom();
             });
         }
 
         private void zoomSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() => {
-                updateMapParameters((int) e.NewValue);
-                updateMapLocations();
+                ms.update((int) e.NewValue);
+                zoomText.Text = "Zoom-Level: " + ms.getZoom();
             });
-        }
-
-        public void updateMapParameters(int zoom)
-        {
-            updateMapParameters(lat, lon, zoom);
-        }
-
-        public void updateMapParameters(double lat, double lon)
-        {
-            updateMapParameters(lat, lon, zoom);
-        }
-
-        public void updateMapParameters(double lat, double lon, int zoom)
-        {
-            this.lat = lat;
-            this.lon = lon;
-            this.zoom = zoom;
-        }
-
-        private void updateMapLocations()
-        {
-            double height = imageGoogleMaps.Height;
-            double width = imageGoogleMaps.Width;
-
-            bingMap.SetView(new System.Device.Location.GeoCoordinate(lat, lon), zoom);
-
-            Uri googleMapsUri = new Uri("http://maps.google.com/maps/api/staticmap?center=" + lat + "," + lon + "&zoom=" + zoom + "&size=" + width + "x" + height + "&sensor=true", UriKind.Absolute);
-            BitmapImage googleMapsSource = new BitmapImage(googleMapsUri);
-            imageGoogleMaps.Source = googleMapsSource;
-
-            Uri osmUri = new Uri("http://tah.openstreetmap.org/MapOf/?lat=" + lat + "&long=" + lon + "&z=" + zoom + "&w=" + width + "&h=" + height + "&format=png", UriKind.Absolute);
-            BitmapImage osmSource = new BitmapImage(osmUri);
-            imageOSM.Source = osmSource;
-
-            zoomText.Text = "Zoom-Level: " + zoom;
         }
     }
 }
