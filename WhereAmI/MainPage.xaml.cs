@@ -20,6 +20,8 @@ namespace WhereAmI
     public partial class MainPage : PhoneApplicationPage
     {
         IGeoPositionWatcher<GeoCoordinate> watcher;
+        double lat, lon;
+        int zoom;
 
         // Constructor
         public MainPage()
@@ -37,18 +39,30 @@ namespace WhereAmI
             if (!App.ViewModel.IsDataLoaded)
                 App.ViewModel.LoadData();
 
-            setMapLocations(52.515, 13.3331, 12);
-            initWatcher();
+            updateMapParameters(52.515, 13.3331, 12);
+            updateMapLocations();
+            initGeoLocationMock();
+            initZoomSlider();
         }
 
-        private void initWatcher()
+        private void initZoomSlider()
+        {
+            zoomSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(zoomSliderValueChanged);
+        }
+
+        private void initGeoLocation()
+        {
+
+        }
+
+        private void initGeoLocationMock()
         {
             if (watcher == null)
             {
                 GeoCoordinateEventMock[] events = new GeoCoordinateEventMock[] {
-                    new  GeoCoordinateEventMock { Latitude=52.515, Longitude=13.3331, Time=new TimeSpan(0,0,10) },
-                    new  GeoCoordinateEventMock { Latitude=52.3987, Longitude=13.0684, Time=new TimeSpan(0,0,10) },
-                    new  GeoCoordinateEventMock { Latitude=52.4145, Longitude=12.5555, Time=new TimeSpan(0,0,10) }
+                    new  GeoCoordinateEventMock { Latitude=52.515, Longitude=13.3331, Time=new TimeSpan(0,0,20) },
+                    new  GeoCoordinateEventMock { Latitude=52.3987, Longitude=13.0684, Time=new TimeSpan(0,0,20) },
+                    new  GeoCoordinateEventMock { Latitude=52.4145, Longitude=12.5555, Time=new TimeSpan(0,0,20) }
                 };
 
                 watcher = new EventListGeoLocationMock(events);
@@ -67,11 +81,37 @@ namespace WhereAmI
         private void watcherPositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() => {
-                setMapLocations(e.Position.Location.Latitude, e.Position.Location.Longitude, 12);
+                updateMapParameters(e.Position.Location.Latitude, e.Position.Location.Longitude);
+                updateMapLocations();
             });
         }
 
-        private void setMapLocations(double lat, double lon, int zoom)
+        private void zoomSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            Deployment.Current.Dispatcher.BeginInvoke(() => {
+                updateMapParameters((int) e.NewValue);
+                updateMapLocations();
+            });
+        }
+
+        public void updateMapParameters(int zoom)
+        {
+            updateMapParameters(lat, lon, zoom);
+        }
+
+        public void updateMapParameters(double lat, double lon)
+        {
+            updateMapParameters(lat, lon, zoom);
+        }
+
+        public void updateMapParameters(double lat, double lon, int zoom)
+        {
+            this.lat = lat;
+            this.lon = lon;
+            this.zoom = zoom;
+        }
+
+        private void updateMapLocations()
         {
             double height = imageGoogleMaps.Height;
             double width = imageGoogleMaps.Width;
@@ -85,6 +125,8 @@ namespace WhereAmI
             Uri osmUri = new Uri("http://tah.openstreetmap.org/MapOf/?lat=" + lat + "&long=" + lon + "&z=" + zoom + "&w=" + width + "&h=" + height + "&format=png", UriKind.Absolute);
             BitmapImage osmSource = new BitmapImage(osmUri);
             imageOSM.Source = osmSource;
+
+            zoomText.Text = "Zoom-Level: " + zoom;
         }
     }
 }

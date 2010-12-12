@@ -25,17 +25,19 @@
             </controls:Panorama.Background>
  
             <controls:PanoramaItem Header="Bing">
-                <my:Map Height="462" HorizontalAlignment="Left" Margin="0,0,0,0" Name="bingMap" VerticalAlignment="Top" Width="420" CredentialsProvider="A1542988199CF9E5D2D556B8168B0C80701DA7F5" />
+                <my:Map Height="400" HorizontalAlignment="Left" Margin="0,0,0,0" Name="bingMap" VerticalAlignment="Top" Width="420" CredentialsProvider="A1542988199CF9E5D2D556B8168B0C80701DA7F5" />
             </controls:PanoramaItem>
  
             <controls:PanoramaItem Header="Google">
-                <Image Height="462" HorizontalAlignment="Left" Margin="0,0,0,0" Name="imageGoogleMaps" Stretch="Fill" VerticalAlignment="Top" Width="420" />
+                <Image Height="400" HorizontalAlignment="Left" Margin="0,0,0,0" Name="imageGoogleMaps" Stretch="Fill" VerticalAlignment="Top" Width="420" />
             </controls:PanoramaItem>
 
             <controls:PanoramaItem Header="OSM">
-                <Image Height="462" HorizontalAlignment="Left" Margin="0,0,0,0" Name="imageOSM" Stretch="Fill" VerticalAlignment="Top" Width="420" />
+                <Image Height="400" HorizontalAlignment="Left" Margin="0,0,0,0" Name="imageOSM" Stretch="Fill" VerticalAlignment="Top" Width="420" />
             </controls:PanoramaItem>
         </controls:Panorama>
+        <TextBlock Margin="25,723,48,49" Name="zoomText"></TextBlock>
+        <Slider HorizontalAlignment="Left" Name="zoomSlider" Width="420" Margin="12,732,0,-19" BorderBrush="#00694A4A" Cursor="None" Maximum="20" Minimum="1" Value="12" Foreground="#FF7BC4E5" Background="#D7FFFFFF" />
     </Grid>
  
     <!--Panorama-based applications should not show an ApplicationBar-->
