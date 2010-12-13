@@ -14,11 +14,13 @@ using System.Windows.Media.Imaging;
 using System.Device.Location;
 using LocationServiceSample;
 using Microsoft.Phone.Controls.Maps;
+using Microsoft.Devices;
 
 namespace WhereAmI
 {
     public partial class MainPage : PhoneApplicationPage
     {
+        GeoCoordinateWatcher watcher;
         IGeoPositionWatcher<GeoCoordinate> watcherMock;
         MapSynchronizer ms;
 
@@ -36,14 +38,17 @@ namespace WhereAmI
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             ms = new MapSynchronizer();
-            //ms.maps.Add("bing", bingMap);
             ms.images.Add("bing", imageBingMaps);
             ms.images.Add("google", imageGoogleMaps);
             ms.images.Add("osm", imageOSM);
             ms.MapsUpdated += setZoomSliderLabel;
             ms.update(52.515, 13.3331, 12, false);
 
-            initGeoLocationMock();
+            if (Microsoft.Devices.Environment.DeviceType == DeviceType.Emulator)
+                initGeoLocationMock();
+            else
+                initGeoLocationWatcher();
+
             initZoomSlider();
         }
 
@@ -58,21 +63,22 @@ namespace WhereAmI
                 };
 
                 watcherMock = new EventListGeoLocationMock(events);
-                //watcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(watcherPositionChanged);
                 watcherMock.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(watcherPositionChanged);
             }
-            //watcher = new GeoCoordinateWatcher(accuracy);
-            //watcher.MovementThreshold = 20;
-
-            //watcher.StatusChanged += new EventHandler<GeoPositionStatusChangedEventArgs>(watcher_StatusChanged);
-            //watcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(watcher_PositionChanged);
 
             watcherMock.Start(); 
         }
 
-        private void initGeoLocation()
+        private void initGeoLocationWatcher()
         {
-
+            if (watcher == null)
+            {
+                watcher = new GeoCoordinateWatcher(GeoPositionAccuracy.High);
+                watcher.MovementThreshold = 20;
+                watcher.PositionChanged += new EventHandler<GeoPositionChangedEventArgs<GeoCoordinate>>(watcherPositionChanged);
+            }
+            
+            watcher.Start();
         }
 
         private void watcherPositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
