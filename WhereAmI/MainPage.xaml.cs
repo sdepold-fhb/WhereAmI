@@ -35,12 +35,13 @@ namespace WhereAmI
         // Load data for the ViewModel Items
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            ms = new MapSynchronizer(1, 2, 3);
-            ms.maps.Add("bing", bingMap);
+            ms = new MapSynchronizer();
+            //ms.maps.Add("bing", bingMap);
+            ms.images.Add("bing", imageBingMaps);
             ms.images.Add("google", imageGoogleMaps);
             ms.images.Add("osm", imageOSM);
             ms.MapsUpdated += setZoomSliderLabel;
-            ms.update(52.515, 13.3331, 12);
+            ms.update(52.515, 13.3331, 12, false);
 
             initGeoLocationMock();
             initZoomSlider();
@@ -99,6 +100,16 @@ namespace WhereAmI
                 ms.update((int) e.NewValue);
                 zoomText.Text = "Zoom-Level: " + ms.getZoom();
             });
+        }
+
+        private void showAlternativeModeCheckbox_Checked(object sender, RoutedEventArgs e)
+        {
+            ms.update(true);
+        }
+
+        private void showAlternativeModeCheckbox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ms.update(false);
         }
     }
 }

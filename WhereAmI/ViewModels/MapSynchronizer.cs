@@ -12,20 +12,25 @@ using System.Collections.Generic;
 using Microsoft.Phone.Controls.Maps;
 using System.Linq;
 using System.Windows.Media.Imaging;
+using System.IO;
 
 namespace WhereAmI
 {
     public class MapSynchronizer
     {
-        double lat, lon;
-        int zoom;
         public Dictionary<String, Object> maps, images;
         public event EventHandler MapsUpdated;
+        const string BING_KEY = "AslbzCOX3iwxX97TSAf28_rxjy-Z6HrIQZhAh6wgB18kBK7LOOGzTFCiFNHN-Ruk";
 
-        public MapSynchronizer(double lat, double lon, int zoom) {  
-            this.lat = lat;
-            this.lon = lon;
-            this.zoom = zoom;
+        double lat, lon;
+        int zoom;
+        bool showAlternative;
+
+        public MapSynchronizer() {
+            lat = lon = 0;
+            zoom = 12;
+            showAlternative = false;
+
             maps = new Dictionary<string, object>();
             images = new Dictionary<string, object>();
         }
@@ -34,24 +39,32 @@ namespace WhereAmI
         {
             return zoom;
         }
-        
+
+        public void update(bool showAlternative)
+        {
+            update(lat, lon, zoom, showAlternative);
+        }
+
         public void update(int zoom)
         {
-            update(lat, lon, zoom);
+            update(lat, lon, zoom, showAlternative);
         }
 
         public void update(double lat, double lon)
         {
-            update(lat, lon, zoom);
+            update(lat, lon, zoom, showAlternative);
         }
 
-        public void update(double lat, double lon, int zoom)
+        public void update(double lat, double lon, int zoom, bool showAlternative)
         {
             this.lat = lat;
             this.lon = lon;
             this.zoom = zoom;
+            this.showAlternative = showAlternative;
             updateMapLocations();
         }
+
+
 
         private Dictionary<String, double> getMapDimension()
         {
@@ -76,19 +89,27 @@ namespace WhereAmI
 
         private Uri getMapUri(string type, double width, double height)
         {
-            string result = "";
+            string template = "";
 
             switch (type)
             {
                 case "google":
-                    result = "http://maps.google.com/maps/api/staticmap?center=" + lat + "," + lon + "&zoom=" + zoom + "&size=" + width + "x" + height + "&sensor=true";
+                    template = "http://maps.google.com/maps/api/staticmap?center={0},{1}&zoom={2}&size={3}x{4}&sensor=true";
+                    if (showAlternative) template += "&maptype=satellite";
                     break;
                 case "osm":
-                    result = "http://tah.openstreetmap.org/MapOf/?lat=" + lat + "&long=" + lon + "&z=" + zoom + "&w=" + width + "&h=" + height + "&format=png";
+                    if (showAlternative)
+                        template = "http://ojw.dev.openstreetmap.org/StaticMap/?lat={0}&lon={1}&z={2}&w={3}&h={4}&layer=cycle&show=1";
+                    else
+                        template = "http://tah.openstreetmap.org/MapOf/?lat={0}&long={1}&z={2}&w={3}&h={4}&format=png";
+                    break;
+                case "bing":
+                    template = "http://dev.virtualearth.net/REST/v1/Imagery/Map/Road/{0},{1}/{2}?mapSize={3},{4}&key=" + BING_KEY;
+                    if (showAlternative) template = template.Replace("/Road/", "/Aerial/");
                     break;
             }
 
-            return new Uri(result, UriKind.Absolute);
+            return new Uri(String.Format(template, lat, lon, zoom, width, height), UriKind.Absolute);
         }
 
         private void updateMapLocations()
@@ -101,10 +122,23 @@ namespace WhereAmI
                 ((Map)pair.Value).SetView(new System.Device.Location.GeoCoordinate(lat, lon), zoom);
 
             foreach (KeyValuePair<String, Object> pair in images)
-                ((Image)pair.Value).Source = new BitmapImage(getMapUri(pair.Key, dimension["width"], dimension["height"]));
+                updateImage((Image)pair.Value, getMapUri(pair.Key, dimension["width"], dimension["height"]));
 
             EventHandler handler = MapsUpdated;
             if (handler != null) handler(this, EventArgs.Empty);
+        }
+
+        private void updateImage(Image i, Uri uri)
+        {
+            WebClient client = new WebClient();
+
+            client.OpenReadCompleted += new OpenReadCompletedEventHandler(delegate(object sender, OpenReadCompletedEventArgs e) {
+                BitmapImage imageToLoad = new BitmapImage();
+                imageToLoad.SetSource(e.Result as Stream);
+                i.Source = imageToLoad;
+            });
+
+            client.OpenReadAsync(uri, uri.AbsoluteUri);
         }
     }
 }
