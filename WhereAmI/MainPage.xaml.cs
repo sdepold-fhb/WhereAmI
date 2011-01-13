@@ -37,18 +37,27 @@ namespace WhereAmI
         // Load data for the ViewModel Items
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
+            // MapSynchronize updates added maps
             ms = new MapSynchronizer();
+
+            // add bing, google and osm
             ms.images.Add("bing", imageBingMaps);
             ms.images.Add("google", imageGoogleMaps);
             ms.images.Add("osm", imageOSM);
+
+            // update the zoom-slider-label after maps have been updated
             ms.MapsUpdated += setZoomSliderLabel;
+
+            // initialize the MapSynchronizer
             ms.update(52.515, 13.3331, 12, false);
 
+            // use a mock for the emulator and real watcher else
             if (Microsoft.Devices.Environment.DeviceType == DeviceType.Emulator)
                 initGeoLocationMock();
             else
                 initGeoLocationWatcher();
 
+            // init zoom slider
             initZoomSlider();
         }
 
@@ -81,6 +90,7 @@ namespace WhereAmI
             watcher.Start();
         }
 
+        // update the MapSynchronizer after changes of the geolocation
         private void watcherPositionChanged(object sender, GeoPositionChangedEventArgs<GeoCoordinate> e)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() => {
@@ -88,11 +98,13 @@ namespace WhereAmI
             });
         }
 
+        // observe zoomslider changes
         private void initZoomSlider()
         {
             zoomSlider.ValueChanged += new RoutedPropertyChangedEventHandler<double>(zoomSliderValueChanged);
         }
 
+        // sets the label of the zoomslider
         private void setZoomSliderLabel(object sender, EventArgs args)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() => {
@@ -100,19 +112,21 @@ namespace WhereAmI
             });
         }
 
+        // updates the MapSynchronizer after changes of the zoomslider
         private void zoomSliderValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             Deployment.Current.Dispatcher.BeginInvoke(() => {
                 ms.update((int) e.NewValue);
-                zoomText.Text = "Zoom-Level: " + ms.getZoom();
             });
         }
 
+        // updates the MapSynchronizer when alternative mode was enabled
         private void showAlternativeModeCheckbox_Checked(object sender, RoutedEventArgs e)
         {
             ms.update(true);
         }
 
+        // updates the MapSynchronizer when alternative mode was disabled
         private void showAlternativeModeCheckbox_Unchecked(object sender, RoutedEventArgs e)
         {
             ms.update(false);

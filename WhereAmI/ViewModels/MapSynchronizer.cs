@@ -27,8 +27,11 @@ namespace WhereAmI
         int zoom;
         bool showAlternative;
 
+        // a list of http clients for loading images asynchronously
         List<WebClient> clients;
 
+        // constructor of the MapSynchronizer
+        // allows updates of maps and images
         public MapSynchronizer() {
             lat = lon = 0;
             zoom = 12;
@@ -69,6 +72,7 @@ namespace WhereAmI
             updateMapLocations();
         }
 
+        // returns the dimension of the first added map or image
         private Dictionary<String, double> getMapDimension()
         {
             Dictionary<String, double> result = new Dictionary<string,double>();
@@ -90,6 +94,7 @@ namespace WhereAmI
             return result;
         }
 
+        // generates an URI for a static map according to the passed type
         private Uri getMapUri(string type, double width, double height)
         {
             string template = "";
@@ -110,27 +115,37 @@ namespace WhereAmI
                     break;
             }
 
+            // replace commas with points in lat and lon
             string url = String.Format(template, lat.ToString().Replace(',', '.'), lon.ToString().Replace(',', '.'), zoom, width, height);
             return new Uri(url, UriKind.Absolute);
         }
 
+        // updates the view of maps and the URI of images
         private void updateMapLocations()
         {
+            // only go on if there are actually maps or images
             if ((maps.Count == 0) && (images.Count == 0)) return;
 
+            // get the dimension of the maps
             Dictionary<String, double> dimension = getMapDimension();
+
+            // cancel all active image load tasks
             cancelImageLoadTasks();
 
+            // update the view of all added maps
             foreach (KeyValuePair<String, Object> pair in maps)
                 ((Map)pair.Value).SetView(new System.Device.Location.GeoCoordinate(lat, lon), zoom);
 
+            // start the update process for each added image
             foreach (KeyValuePair<String, Object> pair in images)
                 updateImage((Image)pair.Value, getMapUri(pair.Key, dimension["width"], dimension["height"]));
 
+            // fire the MapsUpdated event
             EventHandler handler = MapsUpdated;
             if (handler != null) handler(this, EventArgs.Empty);
         }
 
+        // will cancel all asynchronous http requests
         private void cancelImageLoadTasks()
         {
             foreach (WebClient client in clients)
@@ -139,10 +154,12 @@ namespace WhereAmI
             clients.Clear();
         }
 
+        // creates a http client for loading the image asynchronously and adding it to the existing image when finished
         private void updateImage(Image i, Uri uri)
         {
             WebClient client = new WebClient();
 
+            // update the source of the image when the read process is completed
             client.OpenReadCompleted += new OpenReadCompletedEventHandler(delegate(object sender, OpenReadCompletedEventArgs e) {
                 try
                 {
