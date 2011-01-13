@@ -110,7 +110,8 @@ namespace WhereAmI
                     break;
             }
 
-            return new Uri(String.Format(template, lat, lon, zoom, width, height), UriKind.Absolute);
+            string url = String.Format(template, lat.ToString().Replace(',', '.'), lon.ToString().Replace(',', '.'), zoom, width, height);
+            return new Uri(url, UriKind.Absolute);
         }
 
         private void updateMapLocations()
